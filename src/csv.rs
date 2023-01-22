@@ -208,7 +208,7 @@ impl<'a> fmt::Display for CSV<'a> {
     for category in &self.categories {
       display.push_str(category);
       display.push_str(",");
-    } 
+    }
     
     write!(f, "CSV categories: {}", &display[..display.len()-1])
   }
