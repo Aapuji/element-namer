@@ -1,4 +1,5 @@
 use std::fmt;
+use tabled::{builder::Builder, ModifyObject, object::Rows, Alignment, Style};
 
 /**
 A struct representing and storing csv data.
@@ -203,13 +204,37 @@ impl<'a> CSV<'a> {
 
 impl<'a> fmt::Display for CSV<'a> {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    let mut display = String::new();
+    // let mut display = String::new();
     
-    for category in &self.categories {
-      display.push_str(category);
-      display.push_str(",");
+    // for category in &self.categories {
+    //   display.push_str(category);
+    //   display.push_str(",");
+    // }
+    
+    // write!(f, "CSV categories: {}", &display[..display.len()-1])
+
+    let mut builder = Builder::default();
+
+    for id in self.list_category(self.categories[0]).unwrap() {
+      let mut row = vec![];
+      row.push(id);
+
+      let vector = &self.get_row_from_id(id).unwrap()[1..];
+      for item in vector {
+        row.push(item);
+      }
+
+      builder.add_record(row);
     }
-    
-    write!(f, "CSV categories: {}", &display[..display.len()-1])
+
+    builder.set_columns((0..self.categories.len()).map(|i| self.categories[i]));
+
+    let table = builder.build()
+      .with(Style::rounded())
+      .with(Rows::new(1..).modify().with(Alignment::left()))
+      .to_string();
+
+    write!(f, "{}", table)
   }
+
 }
