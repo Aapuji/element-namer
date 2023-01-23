@@ -119,14 +119,41 @@ atomic_number,element,symbol,atomic_mass
 117,Tennessine,Ts,295
 118,Oganesson,Og,294";
 
+use std::io;
+use std::io::Write;
 use element_namer::csv::CSV;
 
-fn main() {
-    let mut csv: CSV = CSV::new();
-    match CSV::from_str(SRC) {
-        Ok(val) => { csv = val; },
-        Err(msg) => println!("{msg}")
-    };
+fn match_elements(phrase: &str, elements: &Vec<&str>) -> Vec<String> {
+  let mut useful_elems: Vec<&str>;
+  for i in 0..phrase.len() {
+    let c: &str = &phrase[i..i+1];
+  }
 
-    println!("{}", csv);
+  vec![]
+}
+
+fn main() {
+  let mut csv = CSV::new();
+  match CSV::from_str(SRC) {
+    Ok(val) => { csv = val; },
+    Err(_) => println!("Uh oh, error")
+  }
+
+  let elements = csv.list_category("element").unwrap();
+  let symbols = csv.list_category("symbol").unwrap();
+  let masses = csv.list_category("atomic_mass").unwrap();
+
+  print!("Enter a phrase: ");
+  if let Err(error) = io::stdout().flush() {
+    println!("Error: {error}");
+  }
+
+  let mut phrase = String::new();
+  match io::stdin().read_line(&mut phrase) {
+    Ok(_) => (),
+    Err(msg) => println!("Error {msg}")
+  }
+  phrase = phrase.trim().to_string().to_lowercase();
+
+  println!("Phrase: {}", phrase);
 }
