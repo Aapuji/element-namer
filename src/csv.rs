@@ -2,17 +2,31 @@ use std::fmt;
 use tabled::{builder::Builder, ModifyObject, object::Rows, Alignment, Style};
 
 /**
+  An enum of the possible error values when working with the `CSV` struct.
+*/
+#[derive(Debug)]
+pub enum CSVError {
+  MissingLineBreak,     // Err("Invalid source string, no line break character.")
+  InvalidItemsCount,    // Err("Wrong number of items in line (doesn't match category size).");
+  InvalidRowLength,     // 
+  InvalidCategory,      // 
+  ReadError             // Err("Error occurred when attempting to read lines.")
+}
+
+type CSVResult<T> = Result<T, CSVError>;
+
+/**
 A struct representing and storing csv data.
 
 First item of each entry should have a unique "id" is the first element in the csv line, though most methods don't check for it.
 */
 #[derive(Debug)]
-pub struct CSV<'a> {
-  categories: Vec<&'a str>,
-  data: Vec<Vec<&'a str>>
+pub struct CSV<'t> {
+  categories: Vec<&'t str>,
+  data: Vec<Vec<&'t str>>
 }
 
-impl<'a> CSV<'a> {
+impl<'t> CSV<'t> {
   /**
     Creates an empty `CSV` instance. 
   */
@@ -26,9 +40,9 @@ impl<'a> CSV<'a> {
   /**
     Creates a `CSV` instance from a header (categories separated by commas). 
   */
-  pub fn from(header: &'a str) -> Self {
-    let categories: Vec<&'a str> = header.split(',').collect();
-    let data: Vec<Vec<&'a str>> = vec![];
+  pub fn from(header: &'t str) -> Self {
+    let categories: Vec<&'t str> = header.split(',').collect();
+    let data: Vec<Vec<&'t str>> = vec![];
     
     CSV {
       categories,
@@ -41,17 +55,17 @@ impl<'a> CSV<'a> {
 
     Returns `Ok` with a `CSV` instance, or `Err` with an error message.
   */
-  pub fn from_str(src: &'a str) -> Result<Self, &'static str> {
+  pub fn from_str(src: &'t str) -> CSVResult<Self> {
     let index = match src.find('\n'){
       Some(val) => val,
-      None => return Err("Invalid source string, no line break character.")
+      None => return Err(CSVError::MissingLineBreak)
     };
 
     let mut csv = CSV::from(&src[..index]);
     
     match csv.read_str(&src[index+1..]) {
       Ok(_) => Ok(csv),
-      Err(_) => Err("Error occurred when attempting to read lines.")
+      Err(_) => Err(CSVError::ReadError)
     }
   }
   
@@ -60,11 +74,11 @@ impl<'a> CSV<'a> {
 
     If the number of values is not equal to the number of categories, then it returns an `Err` with a message. If it is a success, it returns an immutable reference to the corresponding vector in the `CSV` object.
   */
-  pub fn read_line(&mut self, line: &'a str) -> Result<&Vec<&'a str>, &'static str> {
-    let words: Vec<&'a str> = line.split(',').collect();
+  pub fn read_line(&mut self, line: &'t str) -> CSVResult<&Vec<&'t str>> {
+    let words: Vec<&'t str> = line.split(',').collect();
     
     if words.len() != self.categories.len() {
-      return Err("Wrong number of items in line (doesn't match category size).");
+      return Err(CSVError::InvalidItemsCount);
     }
     
     self.data.push(words);
@@ -75,7 +89,7 @@ impl<'a> CSV<'a> {
   /**
     Given the identifier (first item of the row), this will return either `Some` with a reference to the row, or `None` if a row with that identifier doesn't exist. 
   */
-  pub fn get_row_from_id(&self, id: &str) -> Option<&Vec<&'a str>> {
+  pub fn get_row_from_id(&self, id: &str) -> Option<&Vec<&'t str>> {
     for i in 0..self.data.len() {
       if self.data[i][0] == id {
         return Some(&self.data[i]);
@@ -92,7 +106,7 @@ impl<'a> CSV<'a> {
 
     Note that `row` can be longer than the number of categories, but not less.
   */
-  pub fn get_item(&self, category: &str, row: &Vec<&'a str>) -> Result<&'a str, &'static str> {
+  pub fn get_item(&self, category: &str, row: &Vec<&'t str>) -> Result<&'t str, &'static str> {
     let index: usize = match self.categories.iter().position(|e| *e == category) {
       Some(val) => val,
       None => return Err("Invalid category (category not in categories vector).")
@@ -110,13 +124,13 @@ impl<'a> CSV<'a> {
 
     Returns `Ok` with a list of the values for the given category, or `Err` with a mesage if the category doesn't exist.
   */
-  pub fn list_category(&self, category: &str) -> Result<Vec<&'a str>, &'static str> {
+  pub fn list_category(&self, category: &str) -> Result<Vec<&'t str>, &'static str> {
     let index: usize = match self.categories.iter().position(|e| *e == category) {
       Some(val) => val,
       None => return Err("Invalid category (category not in categories vector).")
     };
     
-    let mut output: Vec<&'a str> = vec![];
+    let mut output: Vec<&'t str> = vec![];
     for row in &self.data {
       output.push(&row[index]);
     }
@@ -130,8 +144,8 @@ impl<'a> CSV<'a> {
     Returns `Ok` with a list of values for each category, or `Err` with the message (from `list_category`) if a category is not in the catagories for the `CSV` instacnce.
    
   */
-  pub fn select_categories(&self, categories: Vec<&str>) -> Result<Vec<Vec<&'a str>>, &'static str> {
-    let mut output: Vec<Vec<&'a str>> = vec![];
+  pub fn select_categories(&self, categories: Vec<&str>) -> Result<Vec<Vec<&'t str>>, &'static str> {
+    let mut output: Vec<Vec<&'t str>> = vec![];
     for cat in categories {
       output.push(
         match self.list_category(cat) {
@@ -151,7 +165,7 @@ impl<'a> CSV<'a> {
 
     Returns `Ok` with the number of rows, or `Err` with a vector of indices where `read_line` would have failed.
   */
-  pub fn read_str(&mut self, src: &'a str) -> Result<usize, Vec<usize>> {
+  pub fn read_str(&mut self, src: &'t str) -> Result<usize, Vec<usize>> {
       let lines: Vec<&str> = src.split('\n').collect();
       
       let mut lines_vec: Vec<&str> = vec![];
@@ -188,7 +202,7 @@ impl<'a> CSV<'a> {
     Returns `Ok` with number of rows, or `Err` with the index of the first line that failed to be read (via `read_line`).
   
   */
-  pub fn read_str_sc(&mut self, src: &'a str) -> Result<usize, usize> {
+  pub fn read_str_sc(&mut self, src: &'t str) -> Result<usize, usize> {
     let lines: Vec<&str> = src.split('\n').collect();
     for i in 0..lines.len() {
       match self.read_line(lines[i]) {
@@ -202,7 +216,7 @@ impl<'a> CSV<'a> {
 }
 
 
-impl<'a> fmt::Display for CSV<'a> {
+impl<'t> fmt::Display for CSV<'t> {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     // let mut display = String::new();
     

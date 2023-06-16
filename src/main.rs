@@ -123,14 +123,22 @@ use std::io;
 use std::io::Write;
 use element_namer::csv::CSV;
 
-fn match_elements(phrase: &str, elements: &Vec<&str>) -> Vec<String> {
-  let mut useful_elems: Vec<&str>;
-  for i in 0..phrase.len() {
-    let c: &str = &phrase[i..i+1];
-  }
+// fn match_elements(phrase: &str, elements: &Vec<&str>) -> Vec<String> {
+//   let mut useful_elems: Vec<&str>;
+//   for i in 0..phrase.len() {
+//     let c: &str = &phrase[i..i+1];
+//   }
 
-  vec![]
-}
+//   vec![]
+// }
+
+// fn match_elements(phrase: String, elements: CSVMap) -> Vec<String> {
+//   for window in Vec::from(phrase).windows(2) {
+//     if 
+//   }
+
+//   todo!()
+// }
 
 fn main() {
   let mut csv = CSV::new();
@@ -145,13 +153,13 @@ fn main() {
 
   print!("Enter a phrase: ");
   if let Err(error) = io::stdout().flush() {
-    println!("Error: {error}");
+    println!("Error: {}", error);
   }
 
   let mut phrase = String::new();
   match io::stdin().read_line(&mut phrase) {
     Ok(_) => (),
-    Err(msg) => println!("Error {msg}")
+    Err(msg) => println!("Error {}", msg)
   }
   phrase = phrase.trim().to_string().to_lowercase();
 
