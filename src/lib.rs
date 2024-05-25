@@ -1,1 +1,2 @@
-pub mod csv;
+pub mod analyzer;
+pub mod table;
