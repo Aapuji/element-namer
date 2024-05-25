@@ -17,7 +17,7 @@ impl ElementTable {
       .expect("Failed to read file")
       .to_ascii_lowercase()
       .lines()
-      .into_iter()
+      .skip(1)
     {
       let entry = line.split(",").collect::<Vec<&str>>();
       data.0.push(entry[1].to_owned());
