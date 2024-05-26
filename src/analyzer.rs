@@ -30,16 +30,41 @@ impl Tree {
     }
   }
 
-  pub fn traverse(&self, table: ElementTable) -> Vec<String> {
-    let mut strings: Vec<String> = vec![];
-    let mut masses: Vec<f32> = vec![];
+  pub fn traverse(&self) -> Vec<usize> {
+    let mut indices: Vec<Vec<usize>> = vec![];
+    let mut current: &Tree;
 
-    let mut word = String::new();
-    let mut tree = self;
-    let data = table.data();
+    // Left branches (first element is 1 letter)
+    if self.left.is_some() {
+
+    }
+
+    // Right branches (first element is 2 letters)
+    if self.right.is_some() {
+      let mut branch: Vec<usize> = vec![];
+      
+      current = self.right.as_ref().unwrap();
+      
+
+
+    }
 
     todo!()
   }
+
+  /*
+  /** Given the start node, `current`, this traverses down the tree using the `left` fields, mutating the `branch` vector with the indices from the nodes. It returns the new `current` value. */
+  fn traverse_leftwards_branch<'a>(&self, mut current: &'a Tree, branch: &mut Vec<usize>) -> &'a Tree {
+    while current.left.is_some() {
+      branch.push(current.index);
+      current = current.left.as_ref().unwrap();
+    }
+
+    current
+  }
+  */
+
+
 }
 
 pub fn analyze(str: String, table: &ElementTable, tree: &mut Box<Tree>) -> Option<Tree> {
