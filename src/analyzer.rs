@@ -150,6 +150,36 @@ pub fn analyze(str: String, table: &ElementTable, tree: &mut Box<Tree>) -> Optio
   return Some(*tree.clone()); // Gets the `Tree` out of the `Box` and into the `Some`
 }
 
+pub fn get_results(indices: Vec<Vec<usize>>, table: &ElementTable) -> Vec<(String, f64)> {
+  let mut solutions: Vec<(String, f64)> = vec![];
+
+  let data = table.data();
+
+  for path in indices {
+    let mut str = String::new();
+    let mut mass = 0.0f64;
+
+    for i in path {
+      let mut s = data.1[i].clone();
+      make_ascii_titlecase(&mut s);
+      str.push_str(&s);
+
+      mass += data.2[i];
+    }
+
+    solutions.push(( str, mass ));
+  }
+
+  solutions
+}
+
+fn for_each_element() {}
+
+
+
+
+
+
 pub fn make_ascii_titlecase(str: &mut String){
   if let Some(r) = str.get_mut(0..1) {
     r.make_ascii_uppercase()

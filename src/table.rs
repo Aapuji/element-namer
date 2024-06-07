@@ -5,7 +5,7 @@ use std::fs;
 #[derive(Debug)]
 pub struct ElementTable {
   length: usize,
-  data: (Vec<String>, Vec<String>, Vec<f32>)
+  data: (Vec<String>, Vec<String>, Vec<f64>)
 }
 
 impl ElementTable {
@@ -22,7 +22,7 @@ impl ElementTable {
       let entry = line.split(",").collect::<Vec<&str>>();
       data.0.push(entry[1].to_owned());
       data.1.push(entry[2].to_owned());
-      data.2.push(entry[3].parse::<f32>().expect("Found error when reading csv"));
+      data.2.push(entry[3].parse::<f64>().expect("Found error when reading csv"));
       length += 1;
     }
 
@@ -38,7 +38,7 @@ impl ElementTable {
     self.length
   }
 
-  pub fn data(&self) -> &(Vec<String>, Vec<String>, Vec<f32>) {
+  pub fn data(&self) -> &(Vec<String>, Vec<String>, Vec<f64>) {
     &self.data
   }
 

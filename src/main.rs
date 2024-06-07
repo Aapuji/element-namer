@@ -1,6 +1,6 @@
 use std::env;
 
-use element_namer::analyzer::{analyze, Tree};
+use element_namer::analyzer::{analyze, get_results, Tree};
 use element_namer::table::ElementTable;
 
 fn main() {
@@ -26,7 +26,8 @@ fn main() {
 
     let indices = tree.traverse();
     println!("{:#?}", &indices);
-  }
 
-  
+    let results = get_results(indices, &table);
+    println!("{:#.3?}", &results);
+  }  
 }
