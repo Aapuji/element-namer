@@ -1,20 +1,32 @@
 use std::env;
-use std::fs;
-use std::process;
 
-use element_namer::analyzer::{Tree, analyze};
+use element_namer::analyzer::{analyze, Tree};
 use element_namer::table::ElementTable;
 
 fn main() {
-  let string = env::args().skip(1).next();
+  let string = {
+    let mut ss = String::new();
+    match env::args().skip(1).next() {
+      None => eprintln!("Incorrect arguments: pass in the string you want to analyze"),
+      Some(s) => ss = s
+    }
 
-  if let None = string {
-    eprintln!("Incorrect arguments: pass in the string you want to analyze.");
-  }
+    ss
+  };
 
   let table = ElementTable::from_csv("data.csv").expect("An error occured");
-  let tree = Tree::empty();
-  let output = analyze(string.unwrap().to_owned(), &table, &mut Box::new(tree));
+  
+  let empty = Tree::empty();
+  let output = analyze(string.to_owned(), &table, &mut Box::new(empty.clone()));
+  
+  if output.is_none() {
+    println!("No valid transcription for {:}", string);
+  } else {
+    let tree = output.unwrap();
 
-  println!("{:#?}", output);
+    let indices = tree.traverse();
+    println!("{:#?}", &indices);
+  }
+
+  
 }
